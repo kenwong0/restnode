@@ -85,4 +85,43 @@ app.get('/restaurant_id/:id', function(req,res) {
     });
 });
 
+app.put('/restaurant_id/:id/grade',function(req,res) {
+	//console.log(req.body);
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		Restaurant.find({restaurant_id: req.params.id},function(err,results){
+       			if (err) {
+				res.status(500).json(err);
+				throw err
+				}
+				if (results.length > 0) {
+					var rObj = {};
+					rObj.date = req.body.date;
+					rObj.grade = req.body.grade;
+					rObj.score = req.body.score;
+					Restaurant.update({restaurant_id: req.params.id},{$push:rObj},function(err,results){
+						if (err) {res.status(500).json(err);
+							throw err
+						}
+						if (results.length > 0) {
+							res.status(200).json({message: 'insert done'});
+						}else {
+							res.status(200).json({message: 'No matching document'});
+						}
+					});
+
+			}
+			else {
+				res.status(200).json({message: 'No matching document'});
+			}
+			db.close();
+
+    	});
+    });
+});
+
 app.listen(process.env.PORT || 8099);
