@@ -103,7 +103,7 @@ app.put('/restaurant_id/:id/grade',function(req,res) {
 					rObj.date = req.body.date;
 					rObj.grade = req.body.grade;
 					rObj.score = req.body.score;
-					Restaurant.update({restaurant_id: req.params.id},{$push:rObj},function(err,results){
+					Restaurant.update({'restaurant_id': req.params.id},{$push:{grades:rObj}},function(err,results){
 						if (err) {res.status(500).json(err);
 							throw err
 						}
