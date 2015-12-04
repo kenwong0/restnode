@@ -57,7 +57,7 @@ app.delete('/restaurant_id/:id',function(req,res) {
 			}
        		//console.log('Restaurant removed!')
        		db.close();
-			res.status(200).json({message: 'delete done', id: req.params.id});
+			res.status(200).json({message: 'delete done', restaurant_id: req.params.id});
     	});
     });
 });
@@ -78,7 +78,7 @@ app.get('/restaurant_id/:id', function(req,res) {
 				res.status(200).json(results);
 			}
 			else {
-				res.status(200).json({message: 'No matching document'});
+				res.status(200).json({message: 'No matching document',restaurant_id:req.params.id});
 			}
 			db.close();
     	});
@@ -103,14 +103,12 @@ app.put('/restaurant_id/:id/grade',function(req,res) {
 					rObj.date = req.body.date;
 					rObj.grade = req.body.grade;
 					rObj.score = req.body.score;
-					Restaurant.update({'restaurant_id': req.params.id},{$push:{grades:rObj}},function(err,results){
-						if (err) {res.status(500).json(err);
+					Restaurant.update({restaurant_id: req.params.id},{$push:{grades:rObj}},function(err){
+						if (err) {
+							res.status(500).json(err);
 							throw err
-						}
-						if (results.length > 0) {
-							res.status(200).json({message: 'insert done'});
-						}else {
-							res.status(200).json({message: 'No matching document'});
+						}else{
+							res.status(200).json({message: 'update done'});
 						}
 					});
 
