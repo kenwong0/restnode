@@ -93,32 +93,19 @@ app.put('/restaurant_id/:id/grade',function(req,res) {
 	db.on('error', console.error.bind(console, 'connection error:'));
 	db.once('open', function (callback) {
 		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
-		Restaurant.find({restaurant_id: req.params.id},function(err,results){
-       			if (err) {
+		var rObj = {};
+		rObj.date = req.body.date;
+		rObj.grade = req.body.grade;
+		rObj.score = req.body.score;
+		Restaurant.update({restaurant_id: req.params.id},{$push:{grades:rObj}},function(err){
+			if (err) {
 				res.status(500).json(err);
 				throw err
-				}
-				if (results.length > 0) {
-					var rObj = {};
-					rObj.date = req.body.date;
-					rObj.grade = req.body.grade;
-					rObj.score = req.body.score;
-					Restaurant.update({restaurant_id: req.params.id},{$push:{grades:rObj}},function(err){
-						if (err) {
-							res.status(500).json(err);
-							throw err
-						}else{
-							res.status(200).json({message: 'update done'});
-						}
-					});
-
-			}
-			else {
-				res.status(200).json({message: 'No matching document'});
+			}else{
+				res.status(200).json({message: 'update done'});
 			}
 			db.close();
-
-    	});
+		});
     });
 });
 
