@@ -62,6 +62,64 @@ app.delete('/restaurant_id/:id',function(req,res) {
     });
 });
 
+app.delete('/restaurant/:criteria_attrib/:criteria_attrib_value',function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		if(req.params.criteria_attrib=='building'||req.params.criteria_attrib=='street'||req.params.criteria_attrib=='zipcode'||req.params.criteria_attrib=='coord'){
+			if(req.params.criteria_attrib=='coord'){
+				criteria['address.'+req.params.criteria_attrib] = JSON.parse("[" + req.params.criteria_attrib_value+ "]");
+			}else{
+				criteria['address.'+req.params.criteria_attrib] = req.params.criteria_attrib_value;
+			}
+		}else{
+			criteria[req.params.criteria_attrib] = req.params.criteria_attrib_value;
+		}
+		Restaurant.find(criteria).remove(function(err) {
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+       		//console.log('Restaurant removed!')
+       		db.close();
+			var message = {};
+			message.message = 'delete done';
+			message[req.params.criteria_attrib] = req.params.criteria_attrib_value;
+			res.status(200).json(message);
+    	});
+    });
+});
+
+app.delete('/restaurant/coord/:lon/:lat',function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		criteria['address.coord'] = []
+		criteria['address.coord'].push(req.params.lon);
+		criteria['address.coord'].push(req.params.lat);
+		Restaurant.find(criteria).remove(function(err) {
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+       		//console.log('Restaurant removed!')
+       		db.close();
+			var message = {};
+			message.message = 'delete done';
+			message[req.params.criteria_attrib] = req.params.criteria_attrib_value;
+			res.status(200).json(message);
+    	});
+    });
+});
+
 app.get('/restaurant_id/:id', function(req,res) {
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect(mongodbURL);
@@ -85,14 +143,25 @@ app.get('/restaurant_id/:id', function(req,res) {
     });
 });
 
-app.get('/restaurant_id/:id', function(req,res) {
+app.get('/restaurant/:criteria_attrib/:criteria_attrib_value', function(req,res) {
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect(mongodbURL);
 	var db = mongoose.connection;
 	db.on('error', console.error.bind(console, 'connection error:'));
 	db.once('open', function (callback) {
 		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
-		Restaurant.find({restaurant_id: req.params.id},function(err,results){
+		var criteria = {};
+		if(req.params.criteria_attrib=='building'||req.params.criteria_attrib=='street'||req.params.criteria_attrib=='zipcode'||req.params.criteria_attrib=='coord'){
+			if(req.params.criteria_attrib=='coord'){
+				criteria['address.'+req.params.criteria_attrib] = JSON.parse("[" + req.params.criteria_attrib_value+ "]");
+			}else{
+				criteria['address.'+req.params.criteria_attrib] = req.params.criteria_attrib_value;
+			}
+		}else{
+			criteria[req.params.criteria_attrib] = req.params.criteria_attrib_value;
+		}
+		
+		Restaurant.find(criteria,function(err,results){
        		if (err) {
 				res.status(500).json(err);
 				throw err
@@ -101,7 +170,41 @@ app.get('/restaurant_id/:id', function(req,res) {
 				res.status(200).json(results);
 			}
 			else {
-				res.status(200).json({message: 'No matching document',restaurant_id:req.params.id});
+				var message = {};
+				message.message = 'No matching document';
+				message[req.params.criteria_attrib] = req.params.criteria_attrib_value;
+				res.status(200).json(message);
+			}
+			db.close();
+    	});
+    });
+});
+
+app.get('/restaurant/coord/:lon/:lat', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		criteria['address.coord'] = []
+		criteria['address.coord'].push(req.params.lon);
+		criteria['address.coord'].push(req.params.lat);
+		Restaurant.find(criteria,function(err,results){
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+			if (results.length > 0) {
+				res.status(200).json(results);
+			}
+			else {
+				var message = {};
+				message.message = 'No matching document';
+				message['lon'] = req.params.lon;
+				message['lat'] = req.params.lat;
+				res.status(200).json(message);
 			}
 			db.close();
     	});
@@ -204,41 +307,6 @@ app.put('/restaurant_id/:id',function(req,res) {
     });
 });
 
-	//console.log(req.body);
-	var restaurantSchema = require('./models/restaurant');
-	mongoose.connect(mongodbURL);
-	var db = mongoose.connection;
-	db.on('error', console.error.bind(console, 'connection error:'));
-	db.once('open', function (callback) {
-		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
-		
-		var criteria = {};
-		if(req.params.criteria_attrib=='building'||req.params.criteria_attrib=='street'||req.params.criteria_attrib=='zipcode'||req.params.criteria_attrib=='coord'){
-			if(req.params.criteria_attrib=='coord'){
-				criteria['address.'+req.params.criteria_attrib] = JSON.parse("[" + req.params.criteria_attrib_value+ "]");
-			}else{
-				criteria['address.'+req.params.criteria_attrib] = req.params.criteria_attrib_value;
-			}
-		}else{
-			criteria[req.params.criteria_attrib] = req.params.criteria_attrib_value;
-		}
-		var updateset = {};
-		updateset['address.coord'] = [];
-		updateset['address.coord'].push(req.params.lon_value);
-		updateset['address.coord'].push(req.params.lat_value);
-		//console.log(updateset);
-		
-		Restaurant.update(criteria,{$set:updateset}, {multi: true},function(err){
-			if (err) {
-				res.status(500).json(err);
-				throw err
-			}else{
-				res.status(200).json({message: 'update done'});
-			}
-			db.close();
-		});
-    });
-});
 app.put('/:criteria_attrib/:criteria_attrib_value/:set_attrib/:set_attrib_value',function(req,res) {
 	//console.log(req.body);
 	var restaurantSchema = require('./models/restaurant');
