@@ -38,7 +38,7 @@ app.post('/',function(req,res) {
 			}
        		//console.log('Restaurant created!')
        		db.close();
-			res.status(200).json({message: 'insert done', id: r._id});
+			res.status(200).json({message: 'insert done', _id: r._id});
     	});
     });
 });
@@ -115,6 +115,93 @@ app.delete('/restaurant/coord/:lon/:lat',function(req,res) {
 			var message = {};
 			message.message = 'delete done';
 			message[req.params.criteria_attrib] = req.params.criteria_attrib_value;
+			res.status(200).json(message);
+    	});
+    });
+});
+
+app.get('/restaurant/or/:attrib1/:value1/:attrib2/:value2', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		if(req.params.attrib1=='building'||req.params.attrib1=='street'||req.params.attrib1=='zipcode'||req.params.attrib1=='coord'){
+			if(req.params.attrib1=='coord'){
+				criteria['address.'+req.params.attrib1] = JSON.parse("[" + req.params.value1+ "]");
+			}else{
+				criteria['address.'+req.params.attrib1] = req.params.value1;
+			}
+		}else{
+			criteria[req.params.attrib1] = req.params.value1;
+		}
+		var criteria2 = {};
+		if(req.params.attrib2=='building'||req.params.attrib2=='street'||req.params.attrib2=='zipcode'||req.params.attrib2=='coord'){
+			if(req.params.attrib2=='coord'){
+				criteria2['address.'+req.params.attrib2] = JSON.parse("[" + req.params.value2+ "]");
+			}else{
+				criteria2['address.'+req.params.attrib2] = req.params.value2;
+			}
+		}else{
+			criteria2[req.params.attrib2] = req.params.value2;
+		}
+		Restaurant.find({$or:[criteria,criteria2]}).remove(function(err) {
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+       		//console.log('Restaurant removed!')
+       		db.close();
+			var message = {};
+			message.message = 'delete done';
+			message.or = {};
+			message.or[req.params.attrib1] = req.params.value1;
+			message.or[req.params.attrib2] = req.params.value2;
+			res.status(200).json(message);
+    	});
+    });
+});
+
+app.get('/restaurant/and/:attrib1/:value1/:attrib2/:value2', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		if(req.params.attrib1=='building'||req.params.attrib1=='street'||req.params.attrib1=='zipcode'||req.params.attrib1=='coord'){
+			if(req.params.attrib1=='coord'){
+				criteria['address.'+req.params.attrib1] = JSON.parse("[" + req.params.value1+ "]");
+			}else{
+				criteria['address.'+req.params.attrib1] = req.params.value1;
+			}
+		}else{
+			criteria[req.params.attrib1] = req.params.value1;
+		}
+		if(req.params.attrib2=='building'||req.params.attrib2=='street'||req.params.attrib2=='zipcode'||req.params.attrib2=='coord'){
+			if(req.params.attrib2=='coord'){
+				criteria['address.'+req.params.attrib2] = JSON.parse("[" + req.params.value2+ "]");
+			}else{
+				criteria['address.'+req.params.attrib2] = req.params.value2;
+			}
+		}else{
+			criteria[req.params.attrib2] = req.params.value2;
+		}
+		Restaurant.find(criteria).remove(function(err) {
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+       		//console.log('Restaurant removed!')
+       		db.close();
+			var message = {};
+			message.message = 'delete done';
+			message.and = {};
+			message.and[req.params.attrib1] = req.params.value1;
+			message.and[req.params.attrib2] = req.params.value2;
 			res.status(200).json(message);
     	});
     });
@@ -231,8 +318,101 @@ app.get('/restaurant/:criteria_attrib/:criteria_attrib_value', function(req,res)
     });
 });
 
-app.get('/OR/:criteria_attrib', function(req,res) {
-	console.log(req.params.criteria_attrib);
+app.get('/restaurant/or/:attrib1/:value1/:attrib2/:value2', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		if(req.params.attrib1=='building'||req.params.attrib1=='street'||req.params.attrib1=='zipcode'||req.params.attrib1=='coord'){
+			if(req.params.attrib1=='coord'){
+				criteria['address.'+req.params.attrib1] = JSON.parse("[" + req.params.value1+ "]");
+			}else{
+				criteria['address.'+req.params.attrib1] = req.params.value1;
+			}
+		}else{
+			criteria[req.params.attrib1] = req.params.value1;
+		}
+		var criteria2 = {};
+		if(req.params.attrib2=='building'||req.params.attrib2=='street'||req.params.attrib2=='zipcode'||req.params.attrib2=='coord'){
+			if(req.params.attrib2=='coord'){
+				criteria2['address.'+req.params.attrib2] = JSON.parse("[" + req.params.value2+ "]");
+			}else{
+				criteria2['address.'+req.params.attrib2] = req.params.value2;
+			}
+		}else{
+			criteria2[req.params.attrib2] = req.params.value2;
+		}
+		
+		Restaurant.find({$or:[criteria,criteria2]},function(err,results){
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+			if (results.length > 0) {
+				res.status(200).json(results);
+			}
+			else {
+				var message = {};
+				message.message = 'No matching document';
+				message.or = {};
+				message.or[req.params.attrib1] = req.params.value1;
+				message.or[req.params.attrib2] = req.params.value2;
+				res.status(200).json(message);
+			}
+			db.close();
+    	});
+    });
+});
+
+app.get('/restaurant/and/:attrib1/:value1/:attrib2/:value2', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		var criteria = {};
+		if(req.params.attrib1=='building'||req.params.attrib1=='street'||req.params.attrib1=='zipcode'||req.params.attrib1=='coord'){
+			if(req.params.attrib1=='coord'){
+				criteria['address.'+req.params.attrib1] = JSON.parse("[" + req.params.value1+ "]");
+			}else{
+				criteria['address.'+req.params.attrib1] = req.params.value1;
+			}
+		}else{
+			criteria[req.params.attrib1] = req.params.value1;
+		}
+		if(req.params.attrib2=='building'||req.params.attrib2=='street'||req.params.attrib2=='zipcode'||req.params.attrib2=='coord'){
+			if(req.params.attrib2=='coord'){
+				criteria['address.'+req.params.attrib2] = JSON.parse("[" + req.params.value2+ "]");
+			}else{
+				criteria['address.'+req.params.attrib2] = req.params.value2;
+			}
+		}else{
+			criteria[req.params.attrib2] = req.params.value2;
+		}
+		
+		Restaurant.find(criteria,function(err,results){
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+			if (results.length > 0) {
+				res.status(200).json(results);
+			}
+			else {
+				var message = {};
+				message.message = 'No matching document';
+				message.and = {};
+				message.and[req.params.attrib1] = req.params.value1;
+				message.and[req.params.attrib2] = req.params.value2;
+				res.status(200).json(message);
+			}
+			db.close();
+    	});
+    });
 });
 
 app.get('/restaurant/coord/:lon/:lat', function(req,res) {
