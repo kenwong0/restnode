@@ -7,12 +7,12 @@ Create
 
 Remove
 (Method: DELETE)	
-1. /restaurant_id/:id
-2. /restaurant_id/:id/avgscore
-2. /restaurant/:attrib/:attrib_value
-3. /restaurant/coord/:lon/:lat
-4. /restaurant/or/:attrib1/:value1/:attrib2/:value2
-5. /restaurant/and/:attrib1/:value1/:attrib2/:value2
+1.	/restaurant_id/:id
+2.	/restaurant_id/:id/grade/:_id
+3.	/restaurant/:attrib/:attrib_value
+4.	/restaurant/coord/:lon/:lat
+5.	/restaurant/or/:attrib1/:value1/:attrib2/:value2
+6.	/restaurant/and/:attrib1/:value1/:attrib2/:value2
 
 Update
 (Method: PUT)	
