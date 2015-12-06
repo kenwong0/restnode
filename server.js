@@ -85,6 +85,29 @@ app.get('/restaurant_id/:id', function(req,res) {
     });
 });
 
+app.get('/restaurant_id/:id', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		Restaurant.find({restaurant_id: req.params.id},function(err,results){
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+			if (results.length > 0) {
+				res.status(200).json(results);
+			}
+			else {
+				res.status(200).json({message: 'No matching document',restaurant_id:req.params.id});
+			}
+			db.close();
+    	});
+    });
+});
+
 app.put('/restaurant_id/:id/grade',function(req,res) {
 	//console.log(req.body);
 	var restaurantSchema = require('./models/restaurant');
@@ -170,6 +193,83 @@ app.put('/restaurant_id/:id',function(req,res) {
 		}
 		//console.log(rObj);
 		Restaurant.update({restaurant_id: req.params.id},{$set:rObj},function(err){
+			if (err) {
+				res.status(500).json(err);
+				throw err
+			}else{
+				res.status(200).json({message: 'update done'});
+			}
+			db.close();
+		});
+    });
+});
+
+	//console.log(req.body);
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		
+		var criteria = {};
+		if(req.params.criteria_attrib=='building'||req.params.criteria_attrib=='street'||req.params.criteria_attrib=='zipcode'||req.params.criteria_attrib=='coord'){
+			if(req.params.criteria_attrib=='coord'){
+				criteria['address.'+req.params.criteria_attrib] = JSON.parse("[" + req.params.criteria_attrib_value+ "]");
+			}else{
+				criteria['address.'+req.params.criteria_attrib] = req.params.criteria_attrib_value;
+			}
+		}else{
+			criteria[req.params.criteria_attrib] = req.params.criteria_attrib_value;
+		}
+		var updateset = {};
+		updateset['address.coord'] = [];
+		updateset['address.coord'].push(req.params.lon_value);
+		updateset['address.coord'].push(req.params.lat_value);
+		//console.log(updateset);
+		
+		Restaurant.update(criteria,{$set:updateset}, {multi: true},function(err){
+			if (err) {
+				res.status(500).json(err);
+				throw err
+			}else{
+				res.status(200).json({message: 'update done'});
+			}
+			db.close();
+		});
+    });
+});
+app.put('/:criteria_attrib/:criteria_attrib_value/:set_attrib/:set_attrib_value',function(req,res) {
+	//console.log(req.body);
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		
+		var criteria = {};
+		if(req.params.criteria_attrib=='building'||req.params.criteria_attrib=='street'||req.params.criteria_attrib=='zipcode'||req.params.criteria_attrib=='coord'){
+			if(req.params.criteria_attrib=='coord'){
+				criteria['address.'+req.params.criteria_attrib] = JSON.parse("[" + req.params.criteria_attrib_value+ "]");
+			}else{
+				criteria['address.'+req.params.criteria_attrib] = req.params.criteria_attrib_value;
+			}
+		}else{
+			criteria[req.params.criteria_attrib] = req.params.criteria_attrib_value;
+		}
+		var updateset = {};
+		if(req.params.set_attrib=='building'||req.params.set_attrib=='street'||req.params.set_attrib=='zipcode'||req.params.set_attrib=='coord'){
+			if(req.params.set_attrib=='coord'){
+				updateset['address.'+req.params.set_attrib] = JSON.parse("[" + req.params.set_attrib_value+ "]");
+			}else{
+				updateset['address.'+req.params.set_attrib] = req.params.set_attrib_value;
+			}
+		}else{
+			updateset[req.params.set_attrib] = req.params.set_attrib_value;
+		}
+		
+		Restaurant.update(criteria,{$set:updateset}, {multi: true},function(err){
 			if (err) {
 				res.status(500).json(err);
 				throw err
