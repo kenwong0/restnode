@@ -11,6 +11,8 @@ Remove
 2. /restaurant_id/:id/avgscore
 2. /restaurant/:attrib/:attrib_value
 3. /restaurant/coord/:lon/:lat
+4. /restaurant/or/:attrib1/:value1/:attrib2/:value2
+5. /restaurant/and/:attrib1/:value1/:attrib2/:value2
 
 Update
 (Method: PUT)	
@@ -21,9 +23,12 @@ Update
 Display
 (Method: GET)	
 1. /restaurant_id/:id
-2. /restaurant
-2. /restaurant/:attrib/:attrib_value
-3. /restaurant/coord/:lon/:lat
+2. /restaurant_id/:id/avgscore
+3. /restaurant
+4. /restaurant/:attrib/:attrib_value
+5. /restaurant/coord/:lon/:lat
+6. /restaurant/or/:attrib1/:value1/:attrib2/:value2
+7. /restaurant/and/:attrib1/:value1/:attrib2/:value2
 
 
 
