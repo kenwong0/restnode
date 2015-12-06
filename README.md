@@ -1,2 +1,2 @@
 # restnode
-http://restnode.azurewebsites.com
+http://restnode.azurewebsites.net
