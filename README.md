@@ -8,6 +8,7 @@ Create
 Remove
 (Method: DELETE)	
 1. /restaurant_id/:id
+2. /restaurant_id/:id/avgscore
 2. /restaurant/:attrib/:attrib_value
 3. /restaurant/coord/:lon/:lat
 
@@ -20,6 +21,7 @@ Update
 Display
 (Method: GET)	
 1. /restaurant_id/:id
+2. /restaurant
 2. /restaurant/:attrib/:attrib_value
 3. /restaurant/coord/:lon/:lat
 
