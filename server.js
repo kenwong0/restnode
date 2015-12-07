@@ -85,6 +85,25 @@ app.delete('/restaurant_id/:id/grade/:gid',function(req,res) {
     });
 });
 
+app.delete('/restaurant_id/:id/grade/:date/:grade/:score',function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		Restaurant.update({restaurant_id: req.params.id},{$pull:{grades:{date:req.params.date,grade:req.params.grade,score:req.params.score}}},{ safe: true },function(err){
+			if (err) {
+				res.status(500).json(err);
+				throw err
+			}else{
+				res.status(200).json({message: 'delete done'});
+			}
+			db.close();
+		});
+    });
+});
+
 app.delete('/restaurant/:criteria_attrib/:criteria_attrib_value',function(req,res) {
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect(mongodbURL);
