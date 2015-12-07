@@ -293,7 +293,7 @@ app.get('/restaurant_id/:id/avgscore/lt/:score', function(req,res) {
 		 {$unwind: "$grades"},
 		 {$group: {_id: "$restaurant_id", avg_score: {$avg:
 		"$grades.score"}}},
-		{$elemMatch:{avg_scroe:$lt{req.params.score}}}
+		{$elemMatch:{avg_scroe:$lt:{req.params.score}}}
 		],function(err,results){
        		if (err) {
 				res.status(500).json(err);
