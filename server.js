@@ -277,6 +277,34 @@ app.get('/restaurant_id/:id/avgscore', function(req,res) {
     });
 });
 
+app.get('/restaurant_id/:id/avgscore/lt/70', function(req,res) {
+	var restaurantSchema = require('./models/restaurant');
+	mongoose.connect(mongodbURL);
+	var db = mongoose.connection;
+	db.on('error', console.error.bind(console, 'connection error:'));
+	db.once('open', function (callback) {
+		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
+		Restaurant.aggregate([
+		 {$match: {restaurant_id: req.params.id,$lt:{avg_scroe:70}}},
+		 {$unwind: "$grades"},
+		 {$group: {_id: "$restaurant_id", avg_score: {$avg:
+		"$grades.score"}}}
+		],function(err,results){
+       		if (err) {
+				res.status(500).json(err);
+				throw err
+			}
+			if (results.length > 0) {
+				res.status(200).json(results);
+			}
+			else {
+				res.status(200).json({message: 'No matching document',restaurant_id:req.params.id});
+			}
+			db.close();
+    	});
+    });
+});
+
 app.get('/restaurant', function(req,res) {
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect(mongodbURL);
