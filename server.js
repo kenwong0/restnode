@@ -282,6 +282,7 @@ app.get('/restaurant_id/:id/avgscore', function(req,res) {
 });
 
 app.get('/avgscore/lt/:score', function(req,res) {
+console.log("$match: {avg_scroe:{$lt:"+req.params.score+"}}");
 	var restaurantSchema = require('./models/restaurant');
 	mongoose.connect(mongodbURL);
 	var db = mongoose.connection;
@@ -289,10 +290,10 @@ app.get('/avgscore/lt/:score', function(req,res) {
 	db.once('open', function (callback) {
 		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
 		Restaurant.aggregate([
-		 {$match: {avg_scroe:{$lt:req.params.score}}},
 		 {$unwind: "$grades"},
-		 {$group: {_id: "$restaurant_id", avg_score: {$avg:
-		"$grades.score"}}}
+		 {$group: {_id: "$name", avg_score: {$avg:
+		"$grades.score"}}},
+		{$match: {avg_scroe:{$lt: req.params.score}}}
 		],function(err,results){
        		if (err) {
 				res.status(500).json(err);
