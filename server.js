@@ -289,7 +289,7 @@ app.get('/avgscore/lt/:score', function(req,res) {
 	db.once('open', function (callback) {
 		var Restaurant = mongoose.model('Restaurant', restaurantSchema);
 		Restaurant.aggregate([
-		 {$match: {avg_scroe:{$lt:{req.params.score}}}},
+		 {$match: {avg_scroe:{$lt:req.params.score}}},
 		 {$unwind: "$grades"},
 		 {$group: {_id: "$restaurant_id", avg_score: {$avg:
 		"$grades.score"}}}
